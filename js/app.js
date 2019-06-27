@@ -7,32 +7,40 @@ const clearButton = document.querySelector('#clear-list');
 
 let todoItems = [];
 
-const handleItem = function(item){
+const handleItem = function(itemName){
 
-    const completeItem = document.querySelector('.complete-item');
-    const editItem = document.querySelector('.edit-item');
-    const deleteItem= document.querySelector('.delete-item');
-
-    completeItem.addEventListener('click', function(){
-        console.log(this);
-        this.classList.toggle('completed');
-    });
-
-    deleteItem.addEventListener('click', function(){
-        console.log(this);
-        removeItem(item);
-        if (todoItems.length === 0){
-            todoItems = [];
-            setLocalStorage(todoItems);
-
-        } else {
-            setLocalStorage(todoItems);
-        }
+    const items = itemList.querySelectorAll('.item');
+ 
+    items.forEach(function(item){
         
-        getList(todoItems);
+        if(item.querySelector('.item-name').textContent === itemName){
+            //complete event listener
+            item.querySelector('.complete-item').addEventListener('click', function(){
+                item.querySelector('.item-name').classList.toggle('completed');
+                this.classList.toggle('visibility');
+            });
+            //edit event listener
+            item.querySelector('.edit-item').addEventListener('click', function(){
+                itemInput.value = itemName;
+                itemList.removeChild(item);
+
+                todoItems = todoItems.filter(function(item){
+                    return item !== itemName;
+                });
+            });
+            // delete event listener
+            item.querySelector('.delete-item').addEventListener('click', function(){
+                debugger;
+                itemList.removeChild(item);
+
+                todoItems = todoItems.filter(function(item){
+                    return item !== itemName;
+                });
+
+                showFeedback('item delete', 'success');
+            })
+        }
     })
-
-
 }
 
 const removeItem = function(item){
@@ -46,22 +54,19 @@ const getList = function(todoItems){
     itemList.innerHTML = '';
 
         todoItems.forEach(function(item){
-            const p = document.createElement('p');
+            itemList.insertAdjacentHTML('beforeend', `<div class="item my-3"><h5 class="item-name text-capitalize">${item}</h5><div class="item-icons"><a href="#" class="complete-item mx-2 item-icon"><i class="far fa-check-circle"></i></a><a href="#" class="edit-item mx-2 item-icon"><i class="far fa-edit"></i></a><a href="#" class="delete-item item-icon"><i class="far fa-times-circle"></i></a></div></div>` );
 
-            p.innerHTML = `<div class="item my-3"><h5 class="item-name text-capitalize">${item}</h5><div class="item-icons"><a href="#" class="complete-item mx-2 item-icon"><i class="far fa-check-circle"></i></a><a href="#" class="edit-item mx-2 item-icon"><i class="far fa-edit"></i></a><a href="#" class="delete-item item-icon"><i class="far fa-times-circle"></i></a></div></div>`
-            itemList.appendChild(p);  
-            debugger;
-            
+            handleItem(item);
         });
 }
 
 const getLocalStorage = function(){
 
-    const storage = localStorage.getItem('todoItems');
-    if (storage === 'undefined' || storage === null){
+    const todoStorage = localStorage.getItem('todoItems');
+    if (todoStorage === 'undefined' || todoStorage === null){
         todoItems = [];
     } else {
-        todoItems = JSON.parse(storage);
+        todoItems = JSON.parse(todoStorage);
         getList(todoItems);
     }
 }
@@ -88,13 +93,11 @@ form.addEventListener('submit', function(e){
     } else {
         todoItems.push(itemName);
         setLocalStorage(todoItems);
-        handleItem(itemName);
-
         getList(todoItems);
+        //add event listeners to icons;
+        //handleItem(itemName);
     }
     
-    
-
     itemInput.value = '';
 
     });
